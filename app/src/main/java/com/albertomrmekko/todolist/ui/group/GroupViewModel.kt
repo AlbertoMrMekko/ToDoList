@@ -1,4 +1,4 @@
-package com.albertomrmekko.todolist.ui.viewmodel
+package com.albertomrmekko.todolist.ui.group
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,18 +12,30 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class GroupsViewModel @Inject constructor(
+class GroupViewModel @Inject constructor(
     private val repository: GroupRepository
 ) : ViewModel() {
     val groups: StateFlow<List<GroupEntity>> = repository.getGroups().stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
+        started = SharingStarted.Companion.WhileSubscribed(5_000),
         initialValue = emptyList()
     )
 
     fun addGroup(name: String) {
         viewModelScope.launch {
             repository.addGroup(name)
+        }
+    }
+
+    fun updateGroup(group: GroupEntity) {
+        viewModelScope.launch {
+            repository.updateGroup(group)
+        }
+    }
+
+    fun deleteGroup(group: GroupEntity) {
+        viewModelScope.launch {
+            repository.deleteGroup(group)
         }
     }
 }

@@ -5,7 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
-import com.albertomrmekko.todolist.ui.screens.GroupsScreen
+import androidx.navigation.compose.rememberNavController
+import com.albertomrmekko.todolist.ui.group.GroupScreen
+import com.albertomrmekko.todolist.ui.navigation.NavGraph
+import com.albertomrmekko.todolist.ui.theme.ToDoListTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -14,8 +17,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
-                GroupsScreen()
+            ToDoListTheme {
+                val navController = rememberNavController()
+                NavGraph(navController = navController)
             }
         }
     }

@@ -10,7 +10,9 @@ class GroupRepository @Inject constructor(
 ) {
     fun getGroups(): Flow<List<GroupEntity>> = groupDao.getGroups()
 
-    suspend fun addGroup(name: String) {
-        groupDao.insert(GroupEntity(name = name))
-    }
+    suspend fun addGroup(name: String) = groupDao.insert(GroupEntity(name = name))
+
+    suspend fun updateGroup(group: GroupEntity) = groupDao.update(group)
+
+    suspend fun deleteGroup(group: GroupEntity) = groupDao.delete(group)
 }
