@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
 import com.albertomrmekko.todolist.data.repository.GroupRepository
+import com.albertomrmekko.todolist.domain.model.GroupColor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,9 +22,9 @@ class GroupViewModel @Inject constructor(
         initialValue = emptyList()
     )
 
-    fun addGroup(name: String) {
+    fun addGroup(name: String, color: GroupColor) {
         viewModelScope.launch {
-            repository.addGroup(name)
+            repository.addGroup(name, color)
         }
     }
 

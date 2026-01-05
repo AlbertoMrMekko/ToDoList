@@ -10,16 +10,19 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun TaskScreen (
+fun TaskScreen(
     viewModel: TaskViewModel = hiltViewModel()
 ) {
     val tasks by viewModel.tasks.collectAsState()
 
     Column {
-        LazyColumn (
+        LazyColumn(
             modifier = Modifier.weight(1f)
         ) {
-            items(tasks) { task ->
+            items(
+                items = tasks,
+                key = { task -> task.id }
+            ) { task ->
                 TaskItem(
                     task = task,
                     onDelete = { viewModel.deleteTask(task) },

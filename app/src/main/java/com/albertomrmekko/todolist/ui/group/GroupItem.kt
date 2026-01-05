@@ -15,9 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
+import com.albertomrmekko.todolist.ui.common.theme.toColor
 
 @Composable
-fun GroupItem (
+fun GroupItem(
     group: GroupEntity,
     isEditMode: Boolean,
     onClick: () -> Unit,
@@ -25,11 +26,15 @@ fun GroupItem (
     onDeleteClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(8.dp).clickable(enabled = !isEditMode) { onClick() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable(enabled = !isEditMode) { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = group.name,
+            color = group.color.toColor(),
             modifier = Modifier.weight(1f)
         )
 

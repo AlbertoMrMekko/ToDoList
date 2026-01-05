@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
-    @Query("SELECT * FROM tasks")
+    @Query("SELECT * FROM tasks ORDER BY id ASC")
     fun getTasks(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE groupId = :groupId ORDER BY id DESC")
+    @Query("SELECT * FROM tasks WHERE groupId = :groupId ORDER BY id ASC")
     fun getTasksByGroupId(groupId: Long): Flow<List<TaskEntity>>
 
     @Insert

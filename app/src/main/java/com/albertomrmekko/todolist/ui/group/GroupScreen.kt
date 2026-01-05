@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
+import com.albertomrmekko.todolist.ui.common.dialog.ConfirmDeleteDialog
+import com.albertomrmekko.todolist.ui.common.dialog.GroupDialog
 import com.albertomrmekko.todolist.ui.navigation.Screen
 
 @Composable
@@ -24,7 +26,7 @@ fun GroupScreen(
     val groups by viewModel.groups.collectAsState()
     var showCreateDialog by remember { mutableStateOf(false) }
     var isEditMode by remember { mutableStateOf(false) }
-    var groupToEdit by remember { mutableStateOf<GroupEntity?>(null)}
+    var groupToEdit by remember { mutableStateOf<GroupEntity?>(null) }
     var groupToDelete by remember { mutableStateOf<GroupEntity?>(null) }
 
     Scaffold(
@@ -36,7 +38,10 @@ fun GroupScreen(
         }
     ) { padding ->
         LazyColumn(modifier = Modifier.padding(padding)) {
-            items(groups) { group ->
+            items(
+                items = groups,
+                key = { group -> group.id }
+            ) { group ->
                 GroupItem(
                     group = group,
                     isEditMode = isEditMode,
@@ -67,13 +72,11 @@ fun GroupScreen(
     }
 
     if (showCreateDialog) {
-        NameInputDialog(
+        GroupDialog(
             title = "Nuevo grupo",
-            initialText = "",
             confirmText = "Crear",
-            dismissText = "Cancelar",
-            onConfirm = { name ->
-                viewModel.addGroup(name)
+            onConfirm = { name, color ->
+                viewModel.addGroup(name, color)
                 showCreateDialog = false
             },
             onDismiss = {
@@ -83,13 +86,13 @@ fun GroupScreen(
     }
 
     groupToEdit?.let { group ->
-        NameInputDialog(
+        GroupDialog(
             title = "Editar grupo",
-            initialText = group.name,
+            initialName = group.name,
+            initialColor = group.color,
             confirmText = "Guardar",
-            dismissText = "Cancelar",
-            onConfirm = { newName ->
-                viewModel.updateGroup(group.copy(name = newName))
+            onConfirm = { newName, newColor ->
+                viewModel.updateGroup(group.copy(name = newName, color = newColor))
                 groupToEdit = null
             },
             onDismiss = {

@@ -1,4 +1,4 @@
-package com.albertomrmekko.todolist.ui.group
+package com.albertomrmekko.todolist.ui.common.dialog
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
