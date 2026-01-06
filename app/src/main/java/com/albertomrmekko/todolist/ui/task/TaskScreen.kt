@@ -8,14 +8,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.albertomrmekko.todolist.ui.group.GroupHeader
 
 @Composable
 fun TaskScreen(
     viewModel: TaskViewModel = hiltViewModel()
 ) {
+    val group by viewModel.group.collectAsState()
     val tasks by viewModel.tasks.collectAsState()
 
     Column {
+        group?.let {
+            GroupHeader(
+                name = it.name,
+                color = it.color
+            )
+        }
+
         LazyColumn(
             modifier = Modifier.weight(1f)
         ) {

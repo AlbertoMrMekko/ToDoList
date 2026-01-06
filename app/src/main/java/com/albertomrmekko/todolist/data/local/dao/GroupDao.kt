@@ -13,6 +13,9 @@ interface GroupDao {
     @Query("SELECT * FROM `groups` ORDER BY id ASC")
     fun getGroups(): Flow<List<GroupEntity>>
 
+    @Query("SELECT * FROM `groups` WHERE id = :id")
+    fun getById(id: Long): Flow<GroupEntity?>
+
     @Insert
     suspend fun insert(group: GroupEntity)
 

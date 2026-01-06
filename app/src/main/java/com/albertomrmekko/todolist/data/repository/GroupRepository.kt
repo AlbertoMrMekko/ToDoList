@@ -11,6 +11,8 @@ class GroupRepository @Inject constructor(
 ) {
     fun getGroups(): Flow<List<GroupEntity>> = groupDao.getGroups()
 
+    fun getById(id: Long): Flow<GroupEntity?> = groupDao.getById(id)
+
     suspend fun addGroup(name: String, color: GroupColor) =
         groupDao.insert(GroupEntity(name = name, color = color))
 
