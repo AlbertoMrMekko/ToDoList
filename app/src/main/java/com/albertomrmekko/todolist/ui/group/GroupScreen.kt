@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
+import com.albertomrmekko.todolist.domain.model.AppTheme
+import com.albertomrmekko.todolist.ui.apptheme.AppViewModel
 import com.albertomrmekko.todolist.ui.common.dialog.ConfirmDeleteDialog
 import com.albertomrmekko.todolist.ui.common.dialog.GroupDialog
 import com.albertomrmekko.todolist.ui.navigation.Screen
@@ -21,19 +24,31 @@ import com.albertomrmekko.todolist.ui.navigation.Screen
 @Composable
 fun GroupScreen(
     navController: NavController,
-    viewModel: GroupViewModel = hiltViewModel()
+    viewModel: GroupViewModel = hiltViewModel(),
+    appViewModel: AppViewModel = hiltViewModel()
 ) {
     val groups by viewModel.groups.collectAsState()
     var showCreateDialog by remember { mutableStateOf(false) }
     var isEditMode by remember { mutableStateOf(false) }
     var groupToEdit by remember { mutableStateOf<GroupEntity?>(null) }
     var groupToDelete by remember { mutableStateOf<GroupEntity?>(null) }
+    val theme by appViewModel.theme.collectAsState()
 
     Scaffold(
         topBar = {
             GroupTopBar(
                 isEditMode = isEditMode,
                 onToggleEdit = { isEditMode = !isEditMode }
+            )
+        },
+        bottomBar = {
+            Switch(
+                checked = theme == AppTheme.DARK,
+                onCheckedChange = {
+                    appViewModel.setTheme(
+                        if (it) AppTheme.DARK else AppTheme.LIGHT
+                    )
+                }
             )
         }
     ) { padding ->

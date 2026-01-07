@@ -83,6 +83,9 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
+    // DATASTORE
+    implementation(libs.androidx.datastore.preferences)
+
     // AndroidX core
     implementation(libs.androidx.core.ktx)
 
