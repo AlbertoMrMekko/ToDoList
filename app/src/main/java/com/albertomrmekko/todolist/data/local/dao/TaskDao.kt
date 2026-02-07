@@ -16,6 +16,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE groupId = :groupId ORDER BY id ASC")
     fun getTasksByGroupId(groupId: Long): Flow<List<TaskEntity>>
 
+    @Query("UPDATE tasks SET completed = :completed WHERE id = :taskId")
+    suspend fun updateCompleted(taskId: Long, completed: Boolean)
+
     @Insert
     suspend fun insert(task: TaskEntity)
 

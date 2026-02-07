@@ -1,6 +1,10 @@
 package com.albertomrmekko.todolist.ui.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -11,6 +15,7 @@ import com.albertomrmekko.todolist.ui.group.GroupScreen
 import com.albertomrmekko.todolist.ui.task.TaskScreen
 import com.albertomrmekko.todolist.ui.task.TaskViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavGraph(
     navController: NavHostController
@@ -32,7 +37,16 @@ fun NavGraph(
             )
         ) { backStackEntry ->
             val viewModel: TaskViewModel = hiltViewModel(backStackEntry)
-            TaskScreen(viewModel = viewModel)
+
+            val uiState by viewModel.uiState.collectAsState()
+
+            if (uiState.group != null) {
+                TaskScreen(
+                    group = uiState.group!!,
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                )
+            }
         }
     }
 }

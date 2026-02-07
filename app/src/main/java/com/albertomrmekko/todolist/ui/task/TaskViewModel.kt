@@ -10,8 +10,11 @@ import com.albertomrmekko.todolist.data.repository.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,21 +25,38 @@ class TaskViewModel @Inject constructor(
 ) : ViewModel() {
     private val groupId: Long = checkNotNull(savedStateHandle["groupId"])
 
-    val group: StateFlow<GroupEntity?> = groupRepository.getById(groupId).stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = null
+    private val group: StateFlow<GroupEntity?> = groupRepository.getById(groupId).stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        null
     )
-    val tasks: StateFlow<List<TaskEntity>> = taskRepository.getTasksByGroupId(groupId)
+    private val tasks: StateFlow<List<TaskEntity>> = taskRepository.getTasksByGroupId(groupId)
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000),
             emptyList()
         )
 
-    fun addTask(message: String) {
+    val uiState: StateFlow<TaskUiState> = combine(group, tasks) { group, tasks ->
+        TaskUiState(
+            group = group,
+            activeTasks = tasks.filter { !it.completed },
+            completedTasks = tasks.filter { it.completed }
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        TaskUiState()
+    )
+
+    fun addTask(message: String, reminderDate: LocalDate?, reminderTime: LocalTime?) {
         viewModelScope.launch {
-            taskRepository.addTask(groupId, message)
+            taskRepository.addTask(
+                groupId,
+                message,
+                reminderDate?.toString(),
+                reminderTime?.toString()
+            )
         }
     }
 
@@ -49,6 +69,12 @@ class TaskViewModel @Inject constructor(
     fun deleteTask(task: TaskEntity) {
         viewModelScope.launch {
             taskRepository.deleteTask(task)
+        }
+    }
+
+    fun toggleCompleted(task: TaskEntity) {
+        viewModelScope.launch {
+            taskRepository.setCompleted(task, !task.completed)
         }
     }
 }

@@ -1,10 +1,11 @@
 package com.albertomrmekko.todolist.ui.group
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -12,15 +13,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
 import com.albertomrmekko.todolist.domain.model.AppTheme
 import com.albertomrmekko.todolist.ui.apptheme.AppViewModel
-import com.albertomrmekko.todolist.ui.common.dialog.ConfirmDeleteDialog
-import com.albertomrmekko.todolist.ui.common.dialog.GroupDialog
 import com.albertomrmekko.todolist.ui.navigation.Screen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupScreen(
     navController: NavController,
@@ -28,61 +29,53 @@ fun GroupScreen(
     appViewModel: AppViewModel = hiltViewModel()
 ) {
     val groups by viewModel.groups.collectAsState()
+    val theme by appViewModel.theme.collectAsState()
+
     var showCreateDialog by remember { mutableStateOf(false) }
     var isEditMode by remember { mutableStateOf(false) }
     var groupToEdit by remember { mutableStateOf<GroupEntity?>(null) }
     var groupToDelete by remember { mutableStateOf<GroupEntity?>(null) }
-    val theme by appViewModel.theme.collectAsState()
 
     Scaffold(
         topBar = {
             GroupTopBar(
+                theme = theme,
                 isEditMode = isEditMode,
-                onToggleEdit = { isEditMode = !isEditMode }
+                onThemeChange = {
+                    appViewModel.setTheme(if (it) AppTheme.DARK else AppTheme.LIGHT)
+                }
             )
         },
         bottomBar = {
-            Switch(
-                checked = theme == AppTheme.DARK,
-                onCheckedChange = {
-                    appViewModel.setTheme(
-                        if (it) AppTheme.DARK else AppTheme.LIGHT
-                    )
-                }
+            GroupBottomBar(
+                isEditMode = isEditMode,
+                onCreateClick = { showCreateDialog = true },
+                onEditToggle = { isEditMode = !isEditMode }
             )
         }
     ) { padding ->
-        LazyColumn(modifier = Modifier.padding(padding)) {
-            items(
-                items = groups,
-                key = { group -> group.id }
-            ) { group ->
-                GroupItem(
-                    group = group,
-                    isEditMode = isEditMode,
-                    onClick = {
-                        navController.navigate(
-                            Screen.TaskList.createRoute(group.id)
-                        )
-                    },
-                    onEditClick = {
-                        groupToEdit = group
-                    },
-                    onDeleteClick = {
-                        groupToDelete = group
-                    }
-                )
-            }
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "MIS GRUPOS",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-            if (!isEditMode) {
-                item {
-                    AddGroupItem(
-                        onClick = {
-                            showCreateDialog = true
-                        }
-                    )
-                }
-            }
+            GroupListBox(
+                groups = groups,
+                isEditMode = isEditMode,
+                onGroupClick = { group ->
+                    if (!isEditMode) {
+                        navController.navigate(Screen.TaskList.createRoute(group.id))
+                    }
+                },
+                onEditClick = { groupToEdit = it },
+                onDeleteClick = { groupToDelete = it }
+            )
         }
     }
 

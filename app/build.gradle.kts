@@ -51,6 +51,7 @@ android {
 dependencies {
     // Compose BOM desde Version Catalog
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.material3)
     androidTestImplementation(platform(libs.androidx.compose.bom))
 
     // Compose
@@ -94,4 +95,10 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
+    // Icons
+    implementation(libs.androidx.compose.material.icons.extended)
+
+    // Dates
+    implementation("androidx.compose.material3:material3")
 }

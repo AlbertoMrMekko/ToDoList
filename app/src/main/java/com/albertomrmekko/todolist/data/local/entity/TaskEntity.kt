@@ -17,9 +17,11 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index("groupId")]
 )
-data class TaskEntity (
+data class TaskEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val groupId: Long,
     val message: String,
-    var completed: Boolean = false
+    var completed: Boolean = false,
+    var reminderDate: String?,
+    var reminderTime: String?
 )

@@ -1,4 +1,4 @@
-package com.albertomrmekko.todolist.ui.common.component
+package com.albertomrmekko.todolist.ui.group
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

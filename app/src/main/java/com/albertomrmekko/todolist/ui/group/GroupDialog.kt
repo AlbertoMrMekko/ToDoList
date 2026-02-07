@@ -1,4 +1,4 @@
-package com.albertomrmekko.todolist.ui.common.dialog
+package com.albertomrmekko.todolist.ui.group
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,8 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.albertomrmekko.todolist.domain.model.GroupColor
-import com.albertomrmekko.todolist.ui.common.component.ColorCircle
-import com.albertomrmekko.todolist.ui.common.theme.toColor
 
 @Composable
 fun GroupDialog(

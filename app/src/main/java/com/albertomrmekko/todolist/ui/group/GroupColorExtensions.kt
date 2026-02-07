@@ -1,4 +1,4 @@
-package com.albertomrmekko.todolist.ui.common.theme
+package com.albertomrmekko.todolist.ui.group
 
 import androidx.compose.ui.graphics.Color
 import com.albertomrmekko.todolist.domain.model.GroupColor
