@@ -6,12 +6,13 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
+import com.albertomrmekko.todolist.data.local.relation.GroupWithActiveTaskCount
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface GroupDao {
-    @Query("SELECT * FROM `groups` ORDER BY id ASC")
-    fun getGroups(): Flow<List<GroupEntity>>
+    @Query("SELECT g.*, COUNT(t.id) AS activeTaskCount FROM `groups` g LEFT JOIN tasks t ON t.groupId = g.id AND t.completed = 0 GROUP BY g.id")
+    fun getGroupsWithActiveTaskCount(): Flow<List<GroupWithActiveTaskCount>>
 
     @Query("SELECT * FROM `groups` WHERE id = :id")
     fun getById(id: Long): Flow<GroupEntity?>

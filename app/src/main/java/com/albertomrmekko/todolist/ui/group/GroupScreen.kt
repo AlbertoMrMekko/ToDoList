@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
+import com.albertomrmekko.todolist.data.local.relation.GroupWithActiveTaskCount
 import com.albertomrmekko.todolist.domain.model.AppTheme
 import com.albertomrmekko.todolist.domain.model.GroupColor
 import com.albertomrmekko.todolist.ui.apptheme.AppViewModel
@@ -61,7 +62,7 @@ fun GroupScreen(
     viewModel: GroupViewModel = hiltViewModel(),
     appViewModel: AppViewModel = hiltViewModel()
 ) {
-    val groups by viewModel.groups.collectAsState()
+    val groupsWithActiveTaskCount by viewModel.groups.collectAsState()
     val theme by appViewModel.theme.collectAsState()
 
     var showCreateDialog by remember { mutableStateOf(false) }
@@ -99,7 +100,7 @@ fun GroupScreen(
             )
 
             GroupListBox(
-                groups = groups,
+                groupWithActiveTaskCountList = groupsWithActiveTaskCount,
                 isEditMode = isEditMode,
                 onGroupClick = { group ->
                     if (!isEditMode) {
@@ -185,7 +186,7 @@ fun GroupTopBar(
 
 @Composable
 fun GroupListBox(
-    groups: List<GroupEntity>,
+    groupWithActiveTaskCountList: List<GroupWithActiveTaskCount>,
     isEditMode: Boolean,
     onGroupClick: (GroupEntity) -> Unit,
     onEditClick: (GroupEntity) -> Unit,
@@ -197,13 +198,13 @@ fun GroupListBox(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column {
-            groups.forEach { group ->
+            groupWithActiveTaskCountList.forEach { groupWithActiveTaskCount ->
                 GroupRow(
-                    group = group,
+                    groupWithActiveTaskCount = groupWithActiveTaskCount,
                     isEditMode = isEditMode,
-                    onClick = { onGroupClick(group) },
-                    onEditClick = { onEditClick(group) },
-                    onDeleteClick = { onDeleteClick(group) }
+                    onClick = { onGroupClick(groupWithActiveTaskCount.group) },
+                    onEditClick = { onEditClick(groupWithActiveTaskCount.group) },
+                    onDeleteClick = { onDeleteClick(groupWithActiveTaskCount.group) }
                 )
                 HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
             }
@@ -248,7 +249,7 @@ private fun GroupBottomBar(
 
 @Composable
 fun GroupRow(
-    group: GroupEntity,
+    groupWithActiveTaskCount: GroupWithActiveTaskCount,
     isEditMode: Boolean,
     onClick: () -> Unit,
     onEditClick: () -> Unit,
@@ -266,13 +267,13 @@ fun GroupRow(
             modifier = Modifier
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(group.color.toColor())
+                .background(groupWithActiveTaskCount.group.color.toColor())
         )
 
         Spacer(Modifier.width(12.dp))
 
         Text(
-            text = group.name,
+            text = groupWithActiveTaskCount.group.name,
             modifier = Modifier.weight(1f)
         )
 
@@ -288,7 +289,7 @@ fun GroupRow(
                 )
             }
         } else {
-            Text("3") // TODO num de tareas del grupo (no implementado)
+            Text(groupWithActiveTaskCount.activeTaskCount.toString())
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
         }
     }

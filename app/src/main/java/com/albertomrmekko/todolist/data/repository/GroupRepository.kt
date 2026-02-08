@@ -2,6 +2,7 @@ package com.albertomrmekko.todolist.data.repository
 
 import com.albertomrmekko.todolist.data.local.dao.GroupDao
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
+import com.albertomrmekko.todolist.data.local.relation.GroupWithActiveTaskCount
 import com.albertomrmekko.todolist.domain.model.GroupColor
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -9,7 +10,8 @@ import javax.inject.Inject
 class GroupRepository @Inject constructor(
     private val groupDao: GroupDao
 ) {
-    fun getGroups(): Flow<List<GroupEntity>> = groupDao.getGroups()
+    fun getGroupsWithActiveTaskCount(): Flow<List<GroupWithActiveTaskCount>> =
+        groupDao.getGroupsWithActiveTaskCount()
 
     fun getById(id: Long): Flow<GroupEntity?> = groupDao.getById(id)
 

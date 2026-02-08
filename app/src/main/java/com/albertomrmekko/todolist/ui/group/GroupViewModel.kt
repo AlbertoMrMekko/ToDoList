@@ -3,6 +3,7 @@ package com.albertomrmekko.todolist.ui.group
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
+import com.albertomrmekko.todolist.data.local.relation.GroupWithActiveTaskCount
 import com.albertomrmekko.todolist.data.repository.GroupRepository
 import com.albertomrmekko.todolist.domain.model.GroupColor
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,11 +17,12 @@ import javax.inject.Inject
 class GroupViewModel @Inject constructor(
     private val repository: GroupRepository
 ) : ViewModel() {
-    val groups: StateFlow<List<GroupEntity>> = repository.getGroups().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Companion.WhileSubscribed(5_000),
-        initialValue = emptyList()
-    )
+    val groups: StateFlow<List<GroupWithActiveTaskCount>> =
+        repository.getGroupsWithActiveTaskCount().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Companion.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
 
     fun addGroup(name: String, color: GroupColor) {
         viewModelScope.launch {
