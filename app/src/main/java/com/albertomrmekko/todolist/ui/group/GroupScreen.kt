@@ -29,7 +29,6 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -234,8 +233,9 @@ fun GroupRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(56.dp)
             .clickable(enabled = !isEditMode) { onClick() }
-            .padding(12.dp),
+            .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -254,14 +254,24 @@ fun GroupRow(
         )
 
         if (isEditMode) {
-            IconButton(onClick = onEditClick) {
-                Icon(Icons.Default.Edit, contentDescription = null)
-            }
-            IconButton(onClick = onDeleteClick) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onEditClick() }
+                )
                 Icon(
                     imageVector = Icons.Default.RemoveCircle,
                     tint = Color.Red,
-                    contentDescription = null
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onDeleteClick() }
                 )
             }
         } else {
