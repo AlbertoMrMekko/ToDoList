@@ -193,7 +193,9 @@ private fun GroupBottomBar(
     onCreateClick: () -> Unit,
     onEditToggle: () -> Unit
 ) {
-    Surface(tonalElevation = 4.dp) {
+    Surface(
+        color = MaterialTheme.colorScheme.surface
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -201,21 +203,41 @@ private fun GroupBottomBar(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             if (!isEditMode) {
-                TextButton(onClick = onCreateClick) {
-                    Icon(Icons.Default.AddCircle, contentDescription = null)
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, Color.White, RoundedCornerShape(12.dp))
+                        .clickable { onCreateClick() }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.AddCircle, contentDescription = null, tint = Color.White)
                     Spacer(Modifier.width(4.dp))
-                    Text("Nuevo grupo")
+                    Text("Nuevo grupo", color = Color.White)
                 }
-
-                TextButton(onClick = onEditToggle) {
-                    Icon(Icons.Default.Edit, contentDescription = null)
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, Color.White, RoundedCornerShape(12.dp))
+                        .clickable { onEditToggle() }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White)
                     Spacer(Modifier.width(4.dp))
-                    Text("Editar grupos")
+                    Text("Editar grupos", color = Color.White)
                 }
             } else {
                 Spacer(Modifier.weight(1f))
-                TextButton(onClick = onEditToggle) {
-                    Text("OK")
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, Color.White, RoundedCornerShape(12.dp))
+                        .clickable { onEditToggle() }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("OK", color = Color.White)
                 }
             }
         }
