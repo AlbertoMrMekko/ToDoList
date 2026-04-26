@@ -31,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -50,20 +49,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
 import com.albertomrmekko.todolist.data.local.relation.GroupWithActiveTaskCount
-import com.albertomrmekko.todolist.domain.model.AppTheme
 import com.albertomrmekko.todolist.domain.model.GroupColor
-import com.albertomrmekko.todolist.ui.apptheme.AppViewModel
 import com.albertomrmekko.todolist.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupScreen(
     navController: NavController,
-    viewModel: GroupViewModel = hiltViewModel(),
-    appViewModel: AppViewModel = hiltViewModel()
+    viewModel: GroupViewModel = hiltViewModel()
 ) {
     val groupsWithActiveTaskCount by viewModel.groups.collectAsState()
-    val theme by appViewModel.theme.collectAsState()
 
     var showCreateDialog by remember { mutableStateOf(false) }
     var isEditMode by remember { mutableStateOf(false) }
@@ -72,13 +67,7 @@ fun GroupScreen(
 
     Scaffold(
         topBar = {
-            GroupTopBar(
-                theme = theme,
-                isEditMode = isEditMode,
-                onThemeChange = {
-                    appViewModel.setTheme(if (it) AppTheme.DARK else AppTheme.LIGHT)
-                }
-            )
+            TopAppBar({ Text("RECORDATORIOS") })
         },
         bottomBar = {
             GroupBottomBar(
@@ -163,25 +152,6 @@ fun GroupScreen(
             }
         )
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GroupTopBar(
-    theme: AppTheme,
-    isEditMode: Boolean,
-    onThemeChange: (Boolean) -> Unit
-) {
-    TopAppBar(
-        title = { Text("RECORDATORIOS") },
-        actions = {
-            Switch(
-                checked = theme == AppTheme.DARK,
-                enabled = !isEditMode,
-                onCheckedChange = onThemeChange
-            )
-        }
-    )
 }
 
 @Composable
