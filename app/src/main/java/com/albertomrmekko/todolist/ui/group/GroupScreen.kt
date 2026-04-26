@@ -9,11 +9,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -81,6 +84,7 @@ fun GroupScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
+                .fillMaxSize()
         ) {
             Text(
                 text = "MIS GRUPOS",
@@ -97,7 +101,8 @@ fun GroupScreen(
                     }
                 },
                 onEditClick = { groupToEdit = it },
-                onDeleteClick = { groupToDelete = it }
+                onDeleteClick = { groupToDelete = it },
+                modifier = Modifier.weight(1f)
             )
         }
     }
@@ -160,15 +165,16 @@ fun GroupListBox(
     isEditMode: Boolean,
     onGroupClick: (GroupEntity) -> Unit,
     onEditClick: (GroupEntity) -> Unit,
-    onDeleteClick: (GroupEntity) -> Unit
+    onDeleteClick: (GroupEntity) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         tonalElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
-        Column {
-            groupWithActiveTaskCountList.forEach { groupWithActiveTaskCount ->
+        LazyColumn {
+            items(groupWithActiveTaskCountList) { groupWithActiveTaskCount ->
                 GroupRow(
                     groupWithActiveTaskCount = groupWithActiveTaskCount,
                     isEditMode = isEditMode,
