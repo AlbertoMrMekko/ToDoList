@@ -2,6 +2,7 @@ package com.albertomrmekko.todolist.ui.task
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -32,11 +34,10 @@ import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -59,7 +60,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
@@ -179,17 +179,17 @@ private fun TaskTopBar(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (!isEditMode) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Atrás",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                } else {
-                    Spacer(modifier = Modifier.width(48.dp))
+                IconButton(
+                    onClick = onBack,
+                    enabled = !isEditMode,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Atrás",
+                        tint = if (!isEditMode) Color.White else Color.Transparent,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Row(
@@ -223,8 +223,6 @@ private fun TaskTopBar(
                     style = MaterialTheme.typography.titleLarge,
                     color = groupColor,
                     textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(modifier = Modifier.width(32.dp))
@@ -315,7 +313,6 @@ private fun TaskListContent(
                 onEdit = { onEditTask(task) },
                 onDelete = { onDeleteTask(task) }
             )
-            HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
         }
 
         if (showCompleted && completedTasks.isNotEmpty()) {
@@ -336,7 +333,6 @@ private fun TaskListContent(
                     onEdit = { onEditTask(task) },
                     onDelete = { onDeleteTask(task) }
                 )
-                HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
             }
         }
     }
@@ -350,58 +346,98 @@ private fun TaskRow(
     onToggleCompleted: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    completedStyle: Boolean = false
 ) {
-    Row(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        tonalElevation = 2.dp,
+        border = BorderStroke(1.dp, Color.LightGray)
     ) {
-        IconButton(
-            onClick = onToggleCompleted,
-            modifier = Modifier.size(36.dp)
-        ) {
-            if (task.completed) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 64.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        )
+        {
+            IconButton(
+                onClick = onToggleCompleted,
+                modifier = Modifier.size(36.dp)
+            )
+            {
                 Icon(
-                    imageVector = Icons.Default.CheckCircle,
+                    imageVector = if (task.completed)
+                        Icons.Default.CheckCircle
+                    else
+                        Icons.Default.RadioButtonUnchecked,
                     contentDescription = null,
-                    tint = groupColor
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.RadioButtonUnchecked,
-                    contentDescription = null
+                    tint = if (task.completed) groupColor else Color.Gray
                 )
             }
-        }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = task.message,
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (completedStyle) MaterialTheme.colorScheme.onSurfaceVariant
-            else MaterialTheme.colorScheme.onSurface,
-        )
-
-        if (isEditMode) {
             Spacer(modifier = Modifier.width(8.dp))
 
-            IconButton(onClick = onEdit) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "Editar tarea"
+            val hasDate = task.reminderDate != null || task.reminderTime != null
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp),
+                verticalArrangement = if (hasDate) Arrangement.Top else Arrangement.Center
+            ) {
+                Text(
+                    text = task.message,
+                    style = MaterialTheme.typography.bodyLarge
                 )
+
+                if (hasDate) {
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    val dateText = task.reminderDate ?: ""
+                    val timeText = task.reminderTime ?: ""
+
+                    Text(
+                        text = listOf(dateText, timeText)
+                            .filter { it.isNotBlank() }
+                            .joinToString(", "),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.RemoveCircle,
-                    tint = Color.Red,
-                    contentDescription = "Eliminar tarea"
-                )
+            Row(
+                modifier = Modifier
+                    .width(96.dp)
+                    .height(48.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = onEdit,
+                    enabled = isEditMode
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Editar tarea",
+                        modifier = Modifier.size(26.dp),
+                        tint = if (isEditMode) LocalContentColor.current else Color.Transparent
+                    )
+                }
+
+                IconButton(
+                    onClick = onDelete,
+                    enabled = isEditMode
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.RemoveCircle,
+                        contentDescription = "Eliminar tarea",
+                        modifier = Modifier.size(26.dp),
+                        tint = if (isEditMode) Color.Red else Color.Transparent
+                    )
+                }
             }
         }
     }
