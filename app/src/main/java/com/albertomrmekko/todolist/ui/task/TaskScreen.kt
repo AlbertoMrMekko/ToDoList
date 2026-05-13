@@ -24,17 +24,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -42,12 +37,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,11 +56,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
 import com.albertomrmekko.todolist.data.local.entity.TaskEntity
 import com.albertomrmekko.todolist.domain.model.GroupColor
+import com.albertomrmekko.todolist.ui.common.TaskDateTimeSection
 import com.albertomrmekko.todolist.ui.group.toColor
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneId
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -123,8 +113,8 @@ fun TaskScreen(
         TaskDialog(
             title = "Nueva tarea",
             confirmText = "Crear",
-            onConfirm = { message, date, time ->
-                viewModel.addTask(message, date, time)
+            onConfirm = { message, date ->
+                viewModel.addTask(message, date)
                 showCreateDialog = false
             },
             onDismiss = { showCreateDialog = false }
@@ -132,22 +122,16 @@ fun TaskScreen(
     }
 
     taskToEdit?.let { task ->
-        val date = task.reminderDate?.let { LocalDate.parse(it) }
-        val time = task.reminderTime?.let { LocalTime.parse(it) }
         TaskDialog(
             title = "Editar tarea",
             confirmText = "Guardar",
             initialMessage = task.message,
-            initialDateEnabled = date != null,
-            initialTimeEnabled = time != null,
-            initialDate = date,
-            initialTime = time,
-            onConfirm = { message, date, time ->
+            initialDate = task.date,
+            onConfirm = { message, date ->
                 viewModel.updateTask(
                     task.copy(
                         message = message,
-                        reminderDate = date.toString(),
-                        reminderTime = time.toString()
+                        date = date
                     )
                 )
                 taskToEdit = null
@@ -380,7 +364,7 @@ private fun TaskRow(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            val hasDate = task.reminderDate != null || task.reminderTime != null
+            val hasDate = task.date != null
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -391,17 +375,14 @@ private fun TaskRow(
                     text = task.message,
                     style = MaterialTheme.typography.bodyLarge
                 )
-
                 if (hasDate) {
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    val dateText = task.reminderDate ?: ""
-                    val timeText = task.reminderTime ?: ""
+                    val formatter = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm")
+                    val formattedDate = task.date.format(formatter)
 
                     Text(
-                        text = listOf(dateText, timeText)
-                            .filter { it.isNotBlank() }
-                            .joinToString(", "),
+                        text = formattedDate,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -449,34 +430,29 @@ fun TaskDialog(
     title: String,
     confirmText: String,
     initialMessage: String = "",
-    initialDateEnabled: Boolean = false,
-    initialTimeEnabled: Boolean = false,
-    initialDate: LocalDate? = null,
-    initialTime: LocalTime? = null,
+    initialDate: LocalDateTime? = null,
     onConfirm: (
         message: String,
-        date: LocalDate?,
-        time: LocalTime?
+        date: LocalDateTime?
     ) -> Unit,
     onDismiss: () -> Unit
 ) {
     var message by remember(initialMessage) { mutableStateOf(initialMessage) }
 
-    var dateEnabled by remember(initialDateEnabled) { mutableStateOf(initialDateEnabled) }
-    var timeEnabled by remember(initialTimeEnabled) { mutableStateOf(initialTimeEnabled) }
-
-    var selectedDate by remember(initialDate) { mutableStateOf(initialDate) }
-    var selectedTime by remember(initialTime) { mutableStateOf(initialTime) }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun applyDefaultsIfNeeded() {
-        if (timeEnabled && !dateEnabled) {
-            dateEnabled = true
-            selectedDate = selectedDate ?: LocalDate.now()
-        }
-        if (dateEnabled && !timeEnabled) {
-            selectedTime = selectedTime ?: LocalTime.of(0, 0)
-        }
+    var dateTimeState by remember(initialDate) {
+        mutableStateOf(
+            if (initialDate != null) {
+                TaskDateTimeUiState(
+                    dateEnabled = true,
+                    timeEnabled = true,
+                    selectedDate = initialDate.toLocalDate(),
+                    selectedHour = initialDate.hour,
+                    selectedMinute = initialDate.minute
+                )
+            } else {
+                TaskDateTimeUiState()
+            }
+        )
     }
 
     AlertDialog(
@@ -493,71 +469,21 @@ fun TaskDialog(
                     maxLines = 3
                 )
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.DateRange, contentDescription = null)
-                    Spacer(Modifier.width(12.dp))
-                    Text("Fecha", modifier = Modifier.weight(1f))
-                    Switch(
-                        checked = dateEnabled,
-                        onCheckedChange = {
-                            dateEnabled = it
-                            if (dateEnabled && selectedDate == null) selectedDate = LocalDate.now()
-                            applyDefaultsIfNeeded()
-                        }
-                    )
-                }
-
-                if (dateEnabled) {
-                    Spacer(Modifier.height(8.dp))
-                    DatePickerInline(
-                        initialDate = selectedDate ?: LocalDate.now(),
-                        onDateSelected = { selectedDate = it }
-                    )
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                // HORA
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.AccessTime, contentDescription = null)
-                    Spacer(Modifier.width(12.dp))
-                    Text("Hora", modifier = Modifier.weight(1f))
-                    Switch(
-                        checked = timeEnabled,
-                        onCheckedChange = {
-                            timeEnabled = it
-                            if (timeEnabled && selectedTime == null) {
-                                selectedTime = LocalTime.now().withSecond(0).withNano(0)
-                            }
-                            applyDefaultsIfNeeded()
-                        }
-                    )
-                }
-
-                if (timeEnabled) {
-                    Spacer(Modifier.height(8.dp))
-                    TimePickerInline(
-                        initialTime = selectedTime ?: LocalTime.of(0, 0),
-                        onTimeSelected = { selectedTime = it }
-                    )
-                }
+                TaskDateTimeSection(
+                    state = dateTimeState,
+                    onStateChange = {
+                        dateTimeState = it
+                    }
+                )
             }
         },
         confirmButton = {
             TextButton(
                 enabled = message.isNotBlank(),
                 onClick = {
-                    applyDefaultsIfNeeded()
-
-                    onConfirm(message.trim(), selectedDate, selectedTime)
+                    onConfirm(message.trim(), dateTimeState.toLocalDateTime())
                 }
             ) {
                 Text(confirmText)
@@ -567,51 +493,4 @@ fun TaskDialog(
             TextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DatePickerInline(
-    initialDate: LocalDate,
-    onDateSelected: (LocalDate) -> Unit
-) {
-    val state = rememberDatePickerState(
-        initialSelectedDateMillis = initialDate
-            .atStartOfDay(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
-    )
-
-    DatePicker(
-        state = state,
-        showModeToggle = false,
-        colors = DatePickerDefaults.colors()
-    )
-
-    val selectedMillis = state.selectedDateMillis ?: return
-
-    val selectedDate = Instant.ofEpochMilli(selectedMillis)
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate()
-
-    onDateSelected(selectedDate)
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TimePickerInline(
-    initialTime: LocalTime,
-    onTimeSelected: (LocalTime) -> Unit
-) {
-    val state = rememberTimePickerState(
-        initialHour = initialTime.hour,
-        initialMinute = initialTime.minute,
-        is24Hour = true
-    )
-
-    TimePicker(state = state)
-
-    onTimeSelected(LocalTime.of(state.hour, state.minute))
 }

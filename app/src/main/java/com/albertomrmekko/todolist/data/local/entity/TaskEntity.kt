@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.time.LocalDateTime
 
 @Entity(
     tableName = "tasks",
@@ -21,7 +22,6 @@ data class TaskEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val groupId: Long,
     val message: String,
-    var completed: Boolean = false,
-    var reminderDate: String?,
-    var reminderTime: String?
+    val completed: Boolean = false,
+    val date: LocalDateTime?
 )

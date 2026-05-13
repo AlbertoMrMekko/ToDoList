@@ -3,6 +3,7 @@ package com.albertomrmekko.todolist.data.repository
 import com.albertomrmekko.todolist.data.local.dao.TaskDao
 import com.albertomrmekko.todolist.data.local.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class TaskRepository @Inject constructor(
@@ -14,15 +15,13 @@ class TaskRepository @Inject constructor(
     suspend fun addTask(
         groupId: Long,
         message: String,
-        reminderDate: String?,
-        reminderTime: String?
+        date: LocalDateTime?
     ) =
         taskDao.insert(
             TaskEntity(
                 groupId = groupId,
                 message = message,
-                reminderDate = reminderDate,
-                reminderTime = reminderTime
+                date = date
             )
         )
 

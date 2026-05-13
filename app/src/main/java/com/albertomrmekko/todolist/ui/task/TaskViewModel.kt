@@ -13,8 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalTime
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -49,13 +48,12 @@ class TaskViewModel @Inject constructor(
         TaskUiState()
     )
 
-    fun addTask(message: String, reminderDate: LocalDate?, reminderTime: LocalTime?) {
+    fun addTask(message: String, date: LocalDateTime?) {
         viewModelScope.launch {
             taskRepository.addTask(
                 groupId,
                 message,
-                reminderDate?.toString(),
-                reminderTime?.toString()
+                date
             )
         }
     }
