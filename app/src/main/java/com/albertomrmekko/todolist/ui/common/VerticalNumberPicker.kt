@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,20 +33,34 @@ fun VerticalNumberPicker(
 ) {
     val itemHeight = 40.dp
     val visibleItemsCount = 3
+    val values = valueRange.toList()
+    val itemCount = values.size
+    val middleIndex = Int.MAX_VALUE / 2
+    val initialIndex = middleIndex - (middleIndex % itemCount) + selectedValue
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = (selectedValue - 1).coerceAtLeast(0)
+        initialFirstVisibleItemIndex = initialIndex
     )
+    var centeredIndex by remember { mutableIntStateOf(initialIndex) }
+    var lastEmittedValue by remember { mutableIntStateOf(selectedValue) }
 
-    LaunchedEffect(selectedValue) {
+    LaunchedEffect(listState) {
         snapshotFlow {
             listState.layoutInfo.visibleItemsInfo
         }.collect { visibleItems ->
-            if (visibleItems.size < 2)
+            if (visibleItems.isEmpty())
                 return@collect
 
-            val centeredItem = visibleItems[1]
-            val value = valueRange.first + centeredItem.index
-            if (value in valueRange && value != selectedValue) {
+            val viewportCenter =
+                (listState.layoutInfo.viewportStartOffset +
+                        listState.layoutInfo.viewportEndOffset) / 2
+            val centeredItem = visibleItems.minByOrNull { item ->
+                kotlin.math.abs((item.offset + item.size / 2) - viewportCenter)
+            } ?: return@collect
+
+            centeredIndex = centeredItem.index
+            val value = values[Math.floorMod(centeredItem.index, itemCount)]
+            if (value != lastEmittedValue) {
+                lastEmittedValue = value
                 onValueSelected(value)
             }
         }
@@ -62,8 +79,9 @@ fun VerticalNumberPicker(
                 lazyListState = listState
             )
         ) {
-            items(valueRange.toList()) { value ->
-                val selected = value == selectedValue
+            items(Int.MAX_VALUE) { index ->
+                val value = values[Math.floorMod(index, itemCount)]
+                val selected = index == centeredIndex
 
                 Text(
                     text = value.toString().padStart(2, '0'),

@@ -1,7 +1,5 @@
 package com.albertomrmekko.todolist.ui.task
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -61,7 +59,6 @@ import com.albertomrmekko.todolist.ui.group.toColor
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskScreen(
     group: GroupEntity,
@@ -424,7 +421,6 @@ private fun TaskRow(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskDialog(
     title: String,

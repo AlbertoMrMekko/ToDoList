@@ -1,7 +1,5 @@
 package com.albertomrmekko.todolist.ui.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,7 +13,6 @@ import com.albertomrmekko.todolist.ui.group.GroupScreen
 import com.albertomrmekko.todolist.ui.task.TaskScreen
 import com.albertomrmekko.todolist.ui.task.TaskViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavGraph(
     navController: NavHostController
