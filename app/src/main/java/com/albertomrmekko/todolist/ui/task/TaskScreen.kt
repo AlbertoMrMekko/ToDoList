@@ -40,6 +40,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,7 +57,9 @@ import com.albertomrmekko.todolist.data.local.entity.TaskEntity
 import com.albertomrmekko.todolist.domain.model.GroupColor
 import com.albertomrmekko.todolist.ui.common.TaskDateTimeSection
 import com.albertomrmekko.todolist.ui.group.toColor
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -442,8 +445,6 @@ fun TaskDialog(
                     dateEnabled = true,
                     timeEnabled = true,
                     selectedDate = initialDate.toLocalDate(),
-                    selectedHour = initialDate.hour,
-                    selectedMinute = initialDate.minute
                 )
             } else {
                 TaskDateTimeUiState()
@@ -451,12 +452,14 @@ fun TaskDialog(
         )
     }
 
+    var selectedHour by remember { mutableIntStateOf(initialDate?.hour ?: 0) }
+    var selectedMinute by remember { mutableIntStateOf(initialDate?.minute ?: 0) }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-
                 OutlinedTextField(
                     value = message,
                     onValueChange = { message = it },
@@ -469,9 +472,11 @@ fun TaskDialog(
 
                 TaskDateTimeSection(
                     state = dateTimeState,
-                    onStateChange = {
-                        dateTimeState = it
-                    }
+                    selectedHour = selectedHour,
+                    selectedMinute = selectedMinute,
+                    onHourSelected = { selectedHour = it },
+                    onMinuteSelected = { selectedMinute = it },
+                    onStateChange = { dateTimeState = it }
                 )
             }
         },
@@ -479,7 +484,15 @@ fun TaskDialog(
             TextButton(
                 enabled = message.isNotBlank(),
                 onClick = {
-                    onConfirm(message.trim(), dateTimeState.toLocalDateTime())
+                    val finalDateTime =
+                        if (dateTimeState.dateEnabled || dateTimeState.timeEnabled) {
+                            LocalDateTime.of(
+                                dateTimeState.selectedDate ?: LocalDate.now(),
+                                LocalTime.of(selectedHour, selectedMinute)
+                            )
+                        } else null
+
+                    onConfirm(message.trim(), finalDateTime)
                 }
             ) {
                 Text(confirmText)

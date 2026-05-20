@@ -29,6 +29,10 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun TaskDateTimeSection(
     state: TaskDateTimeUiState,
+    selectedHour: Int,
+    selectedMinute: Int,
+    onHourSelected: (Int) -> Unit,
+    onMinuteSelected: (Int) -> Unit,
     onStateChange: (TaskDateTimeUiState) -> Unit
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
@@ -99,14 +103,10 @@ fun TaskDateTimeSection(
             Spacer(modifier = Modifier.height(16.dp))
 
             HourMinutePicker(
-                selectedHour = state.selectedHour,
-                selectedMinute = state.selectedMinute,
-                onHourSelected = { hour ->
-                    onStateChange(state.copy(selectedHour = hour))
-                },
-                onMinuteSelected = { minute ->
-                    onStateChange(state.copy(selectedMinute = minute))
-                }
+                selectedHour = selectedHour,
+                selectedMinute = selectedMinute,
+                onHourSelected = onHourSelected,
+                onMinuteSelected = onMinuteSelected
             )
         }
     }

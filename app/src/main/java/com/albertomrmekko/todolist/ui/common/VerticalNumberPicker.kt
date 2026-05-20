@@ -43,6 +43,8 @@ fun VerticalNumberPicker(
     var centeredIndex by remember { mutableIntStateOf(initialIndex) }
     var lastEmittedValue by remember { mutableIntStateOf(selectedValue) }
 
+    LaunchedEffect(selectedValue) { lastEmittedValue = selectedValue }
+
     LaunchedEffect(listState) {
         snapshotFlow {
             listState.layoutInfo.visibleItemsInfo
