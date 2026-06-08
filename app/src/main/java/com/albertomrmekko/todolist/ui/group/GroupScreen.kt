@@ -1,5 +1,7 @@
 package com.albertomrmekko.todolist.ui.group
 
+import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -46,12 +49,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
 import com.albertomrmekko.todolist.data.local.relation.GroupWithActiveTaskCount
 import com.albertomrmekko.todolist.domain.model.GroupColor
+import com.albertomrmekko.todolist.notifications.TaskReminderReceiver
 import com.albertomrmekko.todolist.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -167,6 +172,40 @@ fun GroupListBox(
     onDeleteClick: (GroupEntity) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+
+    // fixme : temporal test con boton manual
+
+    val context = LocalContext.current
+
+
+    Button(
+        onClick = {
+
+            Log.d("TEST", "Enviando broadcast directo")
+
+            val intent = Intent(
+                context,
+                TaskReminderReceiver::class.java
+            )
+
+            intent.putExtra(
+                "task_title",
+                "Broadcast directo"
+            )
+
+            intent.putExtra(
+                "notification_id",
+                999
+            )
+
+            context.sendBroadcast(intent)
+        }
+    ) {
+        Text("Test Receiver")
+    }
+
+
     Surface(
         shape = RoundedCornerShape(16.dp),
         tonalElevation = 2.dp,
