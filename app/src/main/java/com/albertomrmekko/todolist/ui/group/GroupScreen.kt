@@ -56,6 +56,7 @@ import androidx.navigation.NavController
 import com.albertomrmekko.todolist.data.local.entity.GroupEntity
 import com.albertomrmekko.todolist.data.local.relation.GroupWithActiveTaskCount
 import com.albertomrmekko.todolist.domain.model.GroupColor
+import com.albertomrmekko.todolist.notifications.AlarmScheduler
 import com.albertomrmekko.todolist.notifications.TaskReminderReceiver
 import com.albertomrmekko.todolist.ui.navigation.Screen
 
@@ -178,31 +179,12 @@ fun GroupListBox(
 
     val context = LocalContext.current
 
-
     Button(
         onClick = {
-
-            Log.d("TEST", "Enviando broadcast directo")
-
-            val intent = Intent(
-                context,
-                TaskReminderReceiver::class.java
-            )
-
-            intent.putExtra(
-                "task_title",
-                "Broadcast directo"
-            )
-
-            intent.putExtra(
-                "notification_id",
-                999
-            )
-
-            context.sendBroadcast(intent)
+            AlarmScheduler(context).scheduleTestAlarm()
         }
     ) {
-        Text("Test Receiver")
+        Text("Test Alarm")
     }
 
 
