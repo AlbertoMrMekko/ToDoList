@@ -16,7 +16,7 @@ class TaskRepository @Inject constructor(
         groupId: Long,
         message: String,
         date: LocalDateTime?
-    ) =
+    ): Long =
         taskDao.insert(
             TaskEntity(
                 groupId = groupId,

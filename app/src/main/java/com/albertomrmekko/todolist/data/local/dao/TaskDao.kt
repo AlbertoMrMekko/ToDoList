@@ -17,7 +17,7 @@ interface TaskDao {
     suspend fun updateCompleted(taskId: Long, completed: Boolean)
 
     @Insert
-    suspend fun insert(task: TaskEntity)
+    suspend fun insert(task: TaskEntity): Long
 
     @Update
     suspend fun update(task: TaskEntity)
