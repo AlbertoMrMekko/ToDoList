@@ -1,5 +1,7 @@
 package com.albertomrmekko.todolist.ui.task
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -62,6 +64,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun TaskScreen(
     group: GroupEntity,
@@ -485,6 +488,31 @@ fun TaskDialog(
                 enabled = message.isNotBlank(),
                 onClick = {
                     val finalDateTime =
+                        if (dateTimeState.dateEnabled) {
+                            if (dateTimeState.timeEnabled) {
+                                LocalDateTime.of(dateTimeState.selectedDate, LocalTime.of(selectedHour, selectedMinute))
+                            }
+                            else {
+                                LocalDateTime.of(dateTimeState.selectedDate, LocalTime.of(0, 0))
+                            }
+                        }
+                        else {
+                            if (dateTimeState.timeEnabled) {
+                                val selectedTime = LocalTime.of(selectedHour, selectedMinute)
+                                val currentDay = LocalDate.now()
+                                val currentTime = LocalTime.now()
+                                if (selectedTime.isAfter(currentTime)) {
+                                    LocalDateTime.of(currentDay, selectedTime)
+                                }
+                                else {
+                                    val tomorrow = currentDay.plusDays(1)
+                                    LocalDateTime.of(tomorrow, selectedTime)
+                                }
+                            }
+                            else {
+                                null
+                            }
+                        }
                         if (dateTimeState.dateEnabled || dateTimeState.timeEnabled) {
                             LocalDateTime.of(
                                 dateTimeState.selectedDate ?: LocalDate.now(),
