@@ -116,6 +116,7 @@ fun TaskScreen(
         TaskDialog(
             title = "Nueva tarea",
             confirmText = "Crear",
+            initialTime = LocalTime.now(),
             onConfirm = { message, date ->
                 viewModel.addTask(message, date)
                 showCreateDialog = false
@@ -130,6 +131,7 @@ fun TaskScreen(
             confirmText = "Guardar",
             initialMessage = task.message,
             initialDate = task.date,
+            initialTime = LocalTime.of(task.date?.hour ?: 0, task.date?.minute ?: 0),
             onConfirm = { message, date ->
                 viewModel.updateTask(
                     task.copy(
@@ -433,6 +435,7 @@ fun TaskDialog(
     confirmText: String,
     initialMessage: String = "",
     initialDate: LocalDateTime? = null,
+    initialTime: LocalTime,
     onConfirm: (
         message: String,
         date: LocalDateTime?
@@ -455,8 +458,8 @@ fun TaskDialog(
         )
     }
 
-    var selectedHour by remember { mutableIntStateOf(initialDate?.hour ?: 0) }
-    var selectedMinute by remember { mutableIntStateOf(initialDate?.minute ?: 0) }
+    var selectedHour by remember { mutableIntStateOf(initialTime.hour) }
+    var selectedMinute by remember { mutableIntStateOf(initialTime.minute) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
