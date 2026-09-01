@@ -71,14 +71,30 @@ class TaskViewModel @Inject constructor(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun updateTask(task: TaskEntity) {
         viewModelScope.launch {
+            alarmScheduler.cancelTaskAlarm(task.id)
             taskRepository.updateTask(task)
+            task.date?.let {
+
+                val triggerAtMillis =
+                    it.atZone(ZoneId.of("Europe/Madrid"))
+                        .toInstant()
+                        .toEpochMilli()
+
+                alarmScheduler.scheduleTaskAlarm(
+                    taskId = task.id,
+                    taskTitle = task.message,
+                    triggerAtMillis = triggerAtMillis
+                )
+            }
         }
     }
 
     fun deleteTask(task: TaskEntity) {
         viewModelScope.launch {
+            alarmScheduler.cancelTaskAlarm(task.id)
             taskRepository.deleteTask(task)
         }
     }
