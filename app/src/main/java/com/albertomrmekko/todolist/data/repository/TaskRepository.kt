@@ -32,4 +32,6 @@ class TaskRepository @Inject constructor(
     suspend fun setCompleted(task: TaskEntity, completed: Boolean) {
         taskDao.updateCompleted(task.id, completed)
     }
+
+    suspend fun getAllTasks(): List<TaskEntity> = taskDao.getAllTasks()
 }

@@ -99,9 +99,27 @@ class TaskViewModel @Inject constructor(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun toggleCompleted(task: TaskEntity) {
         viewModelScope.launch {
-            taskRepository.setCompleted(task, !task.completed)
+            val completed = !task.completed
+            taskRepository.setCompleted(task, completed)
+            if (completed) {
+                alarmScheduler.cancelTaskAlarm(task.id)
+            } else {
+                task.date?.let { date ->
+                    val triggerAtMillis =
+                        date
+                            .atZone(ZoneId.of("Europe/Madrid"))
+                            .toInstant()
+                            .toEpochMilli()
+                    alarmScheduler.scheduleTaskAlarm(
+                        taskId = task.id,
+                        taskTitle = task.message,
+                        triggerAtMillis = triggerAtMillis
+                    )
+                }
+            }
         }
     }
 }
