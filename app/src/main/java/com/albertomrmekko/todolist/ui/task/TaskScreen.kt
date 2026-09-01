@@ -1,5 +1,7 @@
 package com.albertomrmekko.todolist.ui.task
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -62,6 +64,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun TaskScreen(
     group: GroupEntity,
@@ -113,6 +116,7 @@ fun TaskScreen(
         TaskDialog(
             title = "Nueva tarea",
             confirmText = "Crear",
+            initialTime = LocalTime.now(),
             onConfirm = { message, date ->
                 viewModel.addTask(message, date)
                 showCreateDialog = false
@@ -127,6 +131,7 @@ fun TaskScreen(
             confirmText = "Guardar",
             initialMessage = task.message,
             initialDate = task.date,
+            initialTime = LocalTime.of(task.date?.hour ?: 0, task.date?.minute ?: 0),
             onConfirm = { message, date ->
                 viewModel.updateTask(
                     task.copy(
@@ -430,6 +435,7 @@ fun TaskDialog(
     confirmText: String,
     initialMessage: String = "",
     initialDate: LocalDateTime? = null,
+    initialTime: LocalTime,
     onConfirm: (
         message: String,
         date: LocalDateTime?
@@ -452,8 +458,8 @@ fun TaskDialog(
         )
     }
 
-    var selectedHour by remember { mutableIntStateOf(initialDate?.hour ?: 0) }
-    var selectedMinute by remember { mutableIntStateOf(initialDate?.minute ?: 0) }
+    var selectedHour by remember { mutableIntStateOf(initialTime.hour) }
+    var selectedMinute by remember { mutableIntStateOf(initialTime.minute) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -485,6 +491,31 @@ fun TaskDialog(
                 enabled = message.isNotBlank(),
                 onClick = {
                     val finalDateTime =
+                        if (dateTimeState.dateEnabled) {
+                            if (dateTimeState.timeEnabled) {
+                                LocalDateTime.of(dateTimeState.selectedDate, LocalTime.of(selectedHour, selectedMinute))
+                            }
+                            else {
+                                LocalDateTime.of(dateTimeState.selectedDate, LocalTime.of(0, 0))
+                            }
+                        }
+                        else {
+                            if (dateTimeState.timeEnabled) {
+                                val selectedTime = LocalTime.of(selectedHour, selectedMinute)
+                                val currentDay = LocalDate.now()
+                                val currentTime = LocalTime.now()
+                                if (selectedTime.isAfter(currentTime)) {
+                                    LocalDateTime.of(currentDay, selectedTime)
+                                }
+                                else {
+                                    val tomorrow = currentDay.plusDays(1)
+                                    LocalDateTime.of(tomorrow, selectedTime)
+                                }
+                            }
+                            else {
+                                null
+                            }
+                        }
                         if (dateTimeState.dateEnabled || dateTimeState.timeEnabled) {
                             LocalDateTime.of(
                                 dateTimeState.selectedDate ?: LocalDate.now(),

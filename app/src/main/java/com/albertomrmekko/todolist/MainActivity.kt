@@ -1,20 +1,27 @@
-package com.albertomrmekko.todolist.ui
+package com.albertomrmekko.todolist
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.navigation.compose.rememberNavController
+import com.albertomrmekko.todolist.notifications.NotificationHelper
+import com.albertomrmekko.todolist.ui.common.NotificationPermissionRequest
 import com.albertomrmekko.todolist.ui.navigation.NavGraph
 import com.albertomrmekko.todolist.ui.theme.ToDoListTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        NotificationHelper.createNotificationChannel(this)
         setContent {
+            NotificationPermissionRequest()
             ToDoListTheme {
                 val navController = rememberNavController()
                 NavGraph(navController = navController)
