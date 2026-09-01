@@ -1,5 +1,7 @@
 package com.albertomrmekko.todolist.ui.task
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +9,7 @@ import com.albertomrmekko.todolist.data.local.entity.GroupEntity
 import com.albertomrmekko.todolist.data.local.entity.TaskEntity
 import com.albertomrmekko.todolist.data.repository.GroupRepository
 import com.albertomrmekko.todolist.data.repository.TaskRepository
+import com.albertomrmekko.todolist.notifications.AlarmScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,13 +17,15 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val taskRepository: TaskRepository,
-    private val groupRepository: GroupRepository
+    private val groupRepository: GroupRepository,
+    private val alarmScheduler: AlarmScheduler
 ) : ViewModel() {
     private val groupId: Long = checkNotNull(savedStateHandle["groupId"])
 
@@ -48,31 +53,73 @@ class TaskViewModel @Inject constructor(
         TaskUiState()
     )
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun addTask(message: String, date: LocalDateTime?) {
         viewModelScope.launch {
-            taskRepository.addTask(
-                groupId,
-                message,
-                date
-            )
+
+            val taskId = taskRepository.addTask(groupId, message, date)
+
+            if (date != null) {
+                val triggerAtMillis =
+                    date.atZone(ZoneId.of("Europe/Madrid")).toInstant().toEpochMilli()
+                alarmScheduler.scheduleTaskAlarm(
+                    taskId = taskId,
+                    taskTitle = message,
+                    triggerAtMillis = triggerAtMillis
+                )
+            }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun updateTask(task: TaskEntity) {
         viewModelScope.launch {
+            alarmScheduler.cancelTaskAlarm(task.id)
             taskRepository.updateTask(task)
+            task.date?.let {
+
+                val triggerAtMillis =
+                    it.atZone(ZoneId.of("Europe/Madrid"))
+                        .toInstant()
+                        .toEpochMilli()
+
+                alarmScheduler.scheduleTaskAlarm(
+                    taskId = task.id,
+                    taskTitle = task.message,
+                    triggerAtMillis = triggerAtMillis
+                )
+            }
         }
     }
 
     fun deleteTask(task: TaskEntity) {
         viewModelScope.launch {
+            alarmScheduler.cancelTaskAlarm(task.id)
             taskRepository.deleteTask(task)
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun toggleCompleted(task: TaskEntity) {
         viewModelScope.launch {
-            taskRepository.setCompleted(task, !task.completed)
+            val completed = !task.completed
+            taskRepository.setCompleted(task, completed)
+            if (completed) {
+                alarmScheduler.cancelTaskAlarm(task.id)
+            } else {
+                task.date?.let { date ->
+                    val triggerAtMillis =
+                        date
+                            .atZone(ZoneId.of("Europe/Madrid"))
+                            .toInstant()
+                            .toEpochMilli()
+                    alarmScheduler.scheduleTaskAlarm(
+                        taskId = task.id,
+                        taskTitle = task.message,
+                        triggerAtMillis = triggerAtMillis
+                    )
+                }
+            }
         }
     }
 }
