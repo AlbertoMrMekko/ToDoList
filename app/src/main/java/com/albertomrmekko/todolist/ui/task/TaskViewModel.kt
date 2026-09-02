@@ -77,7 +77,6 @@ class TaskViewModel @Inject constructor(
             alarmScheduler.cancelTaskAlarm(task.id)
             taskRepository.updateTask(task)
             task.date?.let {
-
                 val triggerAtMillis =
                     it.atZone(ZoneId.of("Europe/Madrid"))
                         .toInstant()
