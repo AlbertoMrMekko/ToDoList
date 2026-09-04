@@ -5,12 +5,12 @@ import com.albertomrmekko.todolist.domain.model.GroupColor
 
 fun GroupColor.toColor(): Color =
     when (this) {
-        GroupColor.YELLOW -> Color.Companion.Yellow
-        GroupColor.RED -> Color.Companion.Red
-        GroupColor.BLUE -> Color.Companion.Cyan
-        GroupColor.GREEN -> Color.Companion.Green
-        GroupColor.PURPLE -> Color(0xFF9C27B0)
-        GroupColor.ORANGE -> Color(0xFFFF9800)
-        GroupColor.BROWN -> Color(0xFF795548)
-        GroupColor.PINK -> Color(0xFFE91E63)
+        GroupColor.YELLOW -> Color(0xFFFFC107)  // Amber
+        GroupColor.RED -> Color(0xFFF44336)     // Red
+        GroupColor.BLUE -> Color(0xFF2196F3)    // Blue
+        GroupColor.GREEN -> Color(0xFF4CAF50)   // Green
+        GroupColor.PURPLE -> Color(0xFF9C27B0)  // Purple
+        GroupColor.ORANGE -> Color(0xFFFF9800)  // Orange
+        GroupColor.BROWN -> Color(0xFF795548)   // Brown
+        GroupColor.PINK -> Color(0xFFE91E63)    // Pink
     }
