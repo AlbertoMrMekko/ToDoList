@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -228,7 +229,8 @@ private fun TaskBottomBar(
     onExitEditMode: () -> Unit,
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surface
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.navigationBarsPadding()
     ) {
         Row(
             modifier = Modifier
@@ -493,35 +495,34 @@ fun TaskDialog(
                     val finalDateTime =
                         if (dateTimeState.dateEnabled) {
                             if (dateTimeState.timeEnabled) {
-                                LocalDateTime.of(dateTimeState.selectedDate, LocalTime.of(selectedHour, selectedMinute))
-                            }
-                            else {
+                                LocalDateTime.of(
+                                    dateTimeState.selectedDate,
+                                    LocalTime.of(selectedHour, selectedMinute)
+                                )
+                            } else {
                                 LocalDateTime.of(dateTimeState.selectedDate, LocalTime.of(0, 0))
                             }
-                        }
-                        else {
+                        } else {
                             if (dateTimeState.timeEnabled) {
                                 val selectedTime = LocalTime.of(selectedHour, selectedMinute)
                                 val currentDay = LocalDate.now()
                                 val currentTime = LocalTime.now()
                                 if (selectedTime.isAfter(currentTime)) {
                                     LocalDateTime.of(currentDay, selectedTime)
-                                }
-                                else {
+                                } else {
                                     val tomorrow = currentDay.plusDays(1)
                                     LocalDateTime.of(tomorrow, selectedTime)
                                 }
-                            }
-                            else {
+                            } else {
                                 null
                             }
                         }
-                        if (dateTimeState.dateEnabled || dateTimeState.timeEnabled) {
-                            LocalDateTime.of(
-                                dateTimeState.selectedDate ?: LocalDate.now(),
-                                LocalTime.of(selectedHour, selectedMinute)
-                            )
-                        } else null
+                    if (dateTimeState.dateEnabled || dateTimeState.timeEnabled) {
+                        LocalDateTime.of(
+                            dateTimeState.selectedDate ?: LocalDate.now(),
+                            LocalTime.of(selectedHour, selectedMinute)
+                        )
+                    } else null
 
                     onConfirm(message.trim(), finalDateTime)
                 }

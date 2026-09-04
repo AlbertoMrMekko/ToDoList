@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -194,7 +195,8 @@ private fun GroupBottomBar(
     onEditToggle: () -> Unit
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surface
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.navigationBarsPadding()
     ) {
         Row(
             modifier = Modifier
@@ -343,7 +345,7 @@ private fun GroupDialog(
                                 .background(color.toColor())
                                 .border(
                                     width = if (color == selectedColor) 3.dp else 1.dp,
-                                    color = if (color == selectedColor) Color.Black else Color.Gray,
+                                    color = if (color == selectedColor) Color.White else Color.Gray,
                                     shape = CircleShape
                                 )
                                 .clickable { selectedColor = color }
