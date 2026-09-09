@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -26,6 +27,11 @@ class BootReceiver : BroadcastReceiver() {
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onReceive(context: Context, intent: Intent) {
 
+        Log.d(
+            "BOOT_RECEIVER",
+            "Receiver ejecutado. Action=${intent.action}"
+        )
+
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) {
             return
         }
@@ -37,6 +43,10 @@ class BootReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val tasks = taskRepository.getAllTasks()
+
+                Log.d(
+                    "BOOT_RECEIVER", "Tareas encontradas: ${tasks.size}"
+                )
 
                 val now = System.currentTimeMillis()
 
@@ -63,12 +73,60 @@ class BootReceiver : BroadcastReceiver() {
                                 "BOOT_RECEIVER",
                                 "Alarma reprogramada para taskId=${task.id}"
                             )
+
+                            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+
+                            showRescheduledAlarmNotification(
+                                context = context,
+                                taskId = task.id,
+                                taskTitle = task.message,
+                                date = date.format(formatter)
+                            )
+                        } else {
+                            Log.d(
+                                "BOOT_RECEIVER",
+                                "Task ${task.id} ignorada: la fecha ya ha pasado."
+                            )
                         }
                     }
-
             } finally {
                 pendingResult.finish()
             }
         }
+    }
+
+    private fun showRescheduledAlarmNotification(
+        context: Context,
+        taskId: Long,
+        taskTitle: String,
+        date: String
+    ) {
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE)
+                    as android.app.NotificationManager
+
+        val notification = androidx.core.app.NotificationCompat.Builder(
+            context,
+            NotificationHelper.REBOOT_CHANNEL_ID
+        )
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle("Alarma reprogramada")
+            .setContentText("$taskTitle — $date")
+            .setStyle(
+                androidx.core.app.NotificationCompat.BigTextStyle()
+                    .bigText(
+                        "Tarea: $taskTitle\n" +
+                                "Programada: $date\n" +
+                                "Task ID: $taskId"
+                    )
+            )
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(
+            taskId.toInt(),
+            notification
+        )
     }
 }

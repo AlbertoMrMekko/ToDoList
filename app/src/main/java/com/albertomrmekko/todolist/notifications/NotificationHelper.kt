@@ -6,12 +6,13 @@ import android.content.Context
 import android.os.Build
 
 object NotificationHelper {
-    const val CHANNEL_ID = "task_reminders"
+    const val NOTIFICATION_CHANNEL_ID = "task_reminders"
+    const val REBOOT_CHANNEL_ID = "alarm_reschedule"
 
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
+            val notificationChannel = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
                 "Task reminders",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
@@ -19,9 +20,19 @@ object NotificationHelper {
                 enableVibration(true)
             }
 
+            val rebootChannel = NotificationChannel(
+                REBOOT_CHANNEL_ID,
+                "Alarm reschedule",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notifications for alarm scheduling"
+                enableVibration(true)
+            }
+
             val notificationManager = context.getSystemService(NotificationManager::class.java)
 
-            notificationManager.createNotificationChannel(channel)
+            notificationManager.createNotificationChannel(notificationChannel)
+            notificationManager.createNotificationChannel(rebootChannel)
         }
     }
 }
