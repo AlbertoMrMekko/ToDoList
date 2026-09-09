@@ -23,7 +23,7 @@ class TaskReminderReceiver : BroadcastReceiver() {
         )
         val notification = NotificationCompat.Builder(
             context,
-            NotificationHelper.CHANNEL_ID
+            NotificationHelper.NOTIFICATION_CHANNEL_ID
         )
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle("Task reminder")
